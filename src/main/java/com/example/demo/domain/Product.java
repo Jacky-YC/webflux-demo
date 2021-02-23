@@ -9,21 +9,29 @@ import javax.persistence.GenerationType;
 import javax.persistence.Id;
 
 /**
- * @author: YeCheng
- * @date: 2020/11/10
- * @time: 17:15
+ * @author YeCheng
  */
 @Data
 @Entity
 @RequiredArgsConstructor
-public class Stu {
+public class Product {
 
 	@Id
 	@GeneratedValue(strategy = GenerationType.IDENTITY)
 	private Long id;
 
+	/**
+	 * 名称
+	 */
 	private String name;
 
-	private Integer age;
+	/**
+	 * 库存
+	 */
+	private Long stock;
 
+	/**
+	 * 备注
+	 */
+	private Long remark;
 }

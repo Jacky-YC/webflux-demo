@@ -1,13 +1,12 @@
 package com.example.demo.service;
 
 import com.example.demo.domain.Product;
-
-import java.util.List;
-import java.util.Optional;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 public interface ProductService {
 
-	Product save(Product product);
+	Mono<Product> save(Product product);
 
 	void delete(Product product);
 
@@ -15,8 +14,8 @@ public interface ProductService {
 
 	void patch(Product product);
 
-	List<Product> findAll();
+	Flux<Product> findAll();
 
-	Optional<Product> findById(Long id);
+	Mono<Product> findById(Long id);
 
 }

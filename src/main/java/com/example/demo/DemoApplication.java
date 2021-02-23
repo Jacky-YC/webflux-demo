@@ -12,4 +12,10 @@ public class DemoApplication {
 		SpringApplication.run(DemoApplication.class, args);
 	}
 
+
+//	@Bean
+//	@Primary
+//	public PlatformTransactionManager r2dbcTransactionManager(PlatformTransactionManager ptm) {
+//		return ptm;
+//	}
 }

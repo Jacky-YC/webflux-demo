@@ -1,18 +1,17 @@
 package com.example.demo.service.impl;
 
 import com.example.demo.domain.Order;
+import com.example.demo.domain.Product;
 import com.example.demo.repo.OrderRepository;
 import com.example.demo.service.OrderService;
 import com.example.demo.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
-import javax.transaction.Transactional;
-import java.util.List;
-import java.util.Optional;
 
 @Service
-@Transactional
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
 
@@ -21,32 +20,32 @@ public class OrderServiceImpl implements OrderService {
 	private final ProductService productService;
 
 	@Override
-	public Order save(Order order) {
+	public Mono<Order> save(Order order) {
 		return repository.save(order);
 	}
 
 	@Override
 	public void delete(Order order) {
-		repository.delete(order);
+		repository.delete(order).subscribe();
 	}
 
 	@Override
 	public void update(Order order) {
-		repository.save(order);
+		repository.save(order).subscribe();
 	}
 
 	@Override
 	public void patch(Order order) {
-		repository.save(order);
+		repository.save(order).subscribe();
 	}
 
 	@Override
-	public List<Order> findAll() {
+	public Flux<Order> findAll() {
 		return repository.findAll();
 	}
 
 	@Override
-	public Optional<Order> findById(Long id) {
+	public Mono<Order> findById(Long id) {
 		return repository.findById(id);
 	}
 
@@ -58,25 +57,22 @@ public class OrderServiceImpl implements OrderService {
 	 * @return 订单
 	 */
 	@Override
-	public Optional<Order> placeOrder(Long productId, Long number) {
+	public void placeOrder(Long productId, Long number) {
 		// 1. 查库存
-		productService.findById(productId).ifPresentOrElse(product -> {
-			if (product.getStock() > number) {
-				// 2. 库存充足，扣减库存
-				Order order = new Order("库存充足，下单成功！");
-				order.setNumber(number);
-				order.setProduct(product);
-				// 2.1 下订单
-				Order savedOrder = save(order);
-			} else {
-				// 3. 库存不足，返回
-				Order order = new Order("库存不足，无法为您下单！");
-			}
-		}, () -> {
-			new Order("查不到此商品！");
-		});
+		productService.findById(productId).subscribe(product -> toPlaceOrder(product, number));
+	}
 
+	void toPlaceOrder(Product product, Long number) {
+		if (product.getStock() >= number) {
+			// 2. 库存充足，扣减库存
+			product.setStock(product.getStock() - number);
+			productService.patch(product);
 
-		return Optional.empty();
+			// 2.1 下订单
+			Order order = new Order("库存充足，下单成功！");
+			order.setNumber(number);
+			order.setProductId(product.getId());
+			save(order).subscribe(savedOrder -> System.out.println("下单成功! 订单信息: " + savedOrder));
+		}
 	}
 }

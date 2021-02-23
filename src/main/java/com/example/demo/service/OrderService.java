@@ -2,13 +2,12 @@ package com.example.demo.service;
 
 
 import com.example.demo.domain.Order;
-
-import java.util.List;
-import java.util.Optional;
+import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 public interface OrderService {
 
-	Order save(Order order);
+	Mono<Order> save(Order order);
 
 	void delete(Order order);
 
@@ -16,9 +15,9 @@ public interface OrderService {
 
 	void patch(Order order);
 
-	List<Order> findAll();
+	Flux<Order> findAll();
 
-	Optional<Order> findById(Long id);
+	Mono<Order> findById(Long id);
 
-	Optional<Order> placeOrder(Long productId, Long number);
+	void placeOrder(Long productId, Long number);
 }

@@ -2,11 +2,11 @@ package com.example.demo.domain;
 
 import lombok.Data;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.annotation.Id;
 
 import javax.persistence.Entity;
 import javax.persistence.GeneratedValue;
 import javax.persistence.GenerationType;
-import javax.persistence.Id;
 
 /**
  * @author YeCheng
@@ -28,10 +28,10 @@ public class Product {
 	/**
 	 * 库存
 	 */
-	private Long stock;
+	private Long stock = 0L;
 
 	/**
 	 * 备注
 	 */
-	private Long remark;
+	private String remark;
 }

@@ -13,21 +13,21 @@ alter table stu
 create unique index stu_id_uindex
     on stu (id);
 
-create table "order"
+create table "orders"
 (
     id        bigserial   not null
         constraint order_pk
             primary key,
     number    integer     not null,
-    productId integer     not null,
+    product_id integer     not null,
     status    varchar(50) not null
 );
 
-alter table "order"
+alter table "orders"
     owner to sa;
 
 create unique index order_id_uindex
-    on "order" (id);
+    on "orders" (id);
 
 create table product
 (
@@ -44,3 +44,5 @@ alter table product
 
 create unique index product_id_uindex
     on product (id);
+
+insert into product (name, stock, remark) values('戴森吹风机', 1, '好');

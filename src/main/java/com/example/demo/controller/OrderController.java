@@ -10,6 +10,8 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
 
+import java.util.Random;
+
 @RequestMapping("/v0/order")
 @RestController
 @RequiredArgsConstructor
@@ -24,6 +26,7 @@ public class OrderController {
 
 	@PostMapping("/placeOrder")
 	public Flux placeOrder(@RequestParam Long productId, @RequestParam Long number) {
+		System.out.println(new Random().nextInt());
 		orderService.placeOrder(productId, number);
 		return Flux.empty();
 	}

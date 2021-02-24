@@ -6,11 +6,15 @@ import com.example.demo.repo.OrderRepository;
 import com.example.demo.service.OrderService;
 import com.example.demo.service.ProductService;
 import lombok.RequiredArgsConstructor;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import java.util.concurrent.locks.Lock;
+import java.util.concurrent.locks.ReentrantLock;
 
+@Slf4j
 @Service
 @RequiredArgsConstructor
 public class OrderServiceImpl implements OrderService {
@@ -62,8 +66,12 @@ public class OrderServiceImpl implements OrderService {
 		productService.findById(productId).subscribe(product -> toPlaceOrder(product, number));
 	}
 
-	void toPlaceOrder(Product product, Long number) {
+
+	private Lock lock = new ReentrantLock();
+
+	synchronized void toPlaceOrder(Product product, Long number) {
 		if (product.getStock() >= number) {
+			lock.lock();
 			// 2. 库存充足，扣减库存
 			product.setStock(product.getStock() - number);
 			productService.patch(product);
@@ -72,7 +80,10 @@ public class OrderServiceImpl implements OrderService {
 			Order order = new Order("库存充足，下单成功！");
 			order.setNumber(number);
 			order.setProductId(product.getId());
-			save(order).subscribe(savedOrder -> System.out.println("下单成功! 订单信息: " + savedOrder));
+			save(order).subscribe(savedOrder -> log.info("下单成功! 订单信息: {}", savedOrder));
+			lock.unlock();
+		} else {
+			log.warn("productId: {}, name: {}, 库存不足，无法下单，请补充库存!", product.getId(), product.getName());
 		}
 	}
 }

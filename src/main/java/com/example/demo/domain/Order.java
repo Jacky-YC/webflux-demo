@@ -4,11 +4,7 @@ import lombok.Data;
 import lombok.NoArgsConstructor;
 import org.springframework.data.annotation.Id;
 
-import javax.persistence.Column;
 import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.SequenceGenerator;
 
 /**
  * @author YeCheng
@@ -19,9 +15,7 @@ import javax.persistence.SequenceGenerator;
 public class Order {
 
 	@Id
-	@GeneratedValue(strategy = GenerationType.SEQUENCE, generator = "order_id_seq")
-	@SequenceGenerator(name = "order_id_seq", sequenceName = "order_id_seq", allocationSize = 1)
-	private Long id;
+	private Long id = 0L;
 
 	/**
 	 * 下单数量

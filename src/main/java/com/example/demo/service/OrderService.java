@@ -9,11 +9,11 @@ public interface OrderService {
 
 	Mono<Order> save(Order order);
 
-	void delete(Order order);
+	Mono<Void> delete(Order order);
 
-	void update(Order order);
+	Mono<Order> update(Order order);
 
-	void patch(Order order);
+	Mono<Order> patch(Order order);
 
 	Flux<Order> findAll();
 

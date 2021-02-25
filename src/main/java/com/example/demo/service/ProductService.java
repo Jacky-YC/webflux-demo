@@ -8,11 +8,11 @@ public interface ProductService {
 
 	Mono<Product> save(Product product);
 
-	void delete(Product product);
+	Mono<Void> delete(Product product);
 
-	void update(Product product);
+	Mono<Product> update(Product product);
 
-	void patch(Product product);
+	Mono<Product> patch(Product product);
 
 	Flux<Product> findAll();
 

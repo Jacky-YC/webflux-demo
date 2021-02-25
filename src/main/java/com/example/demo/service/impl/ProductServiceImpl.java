@@ -8,6 +8,8 @@ import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.transaction.Transactional;
+
 @Service
 @RequiredArgsConstructor
 public class ProductServiceImpl implements ProductService {
@@ -15,23 +17,26 @@ public class ProductServiceImpl implements ProductService {
 	private final ProductRepository repository;
 
 	@Override
+	@Transactional
 	public Mono<Product> save(Product product) {
 		return repository.save(product);
 	}
 
 	@Override
-	public void delete(Product product) {
-		repository.delete(product).subscribe();
+	@Transactional
+	public Mono<Void> delete(Product product) {
+		return repository.delete(product);
 	}
 
 	@Override
-	public void update(Product product) {
-		repository.save(product).subscribe();
+	public Mono<Product> update(Product product) {
+		return repository.save(product);
 	}
 
 	@Override
-	public void patch(Product product) {
-		repository.save(product).subscribe();
+	@Transactional
+	public Mono<Product> patch(Product product) {
+		return repository.save(product);
 	}
 
 	@Override

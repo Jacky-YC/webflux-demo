@@ -7,10 +7,12 @@ import com.example.demo.service.OrderService;
 import com.example.demo.service.ProductService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.beans.factory.annotation.Qualifier;
 import org.springframework.stereotype.Service;
 import reactor.core.publisher.Flux;
 import reactor.core.publisher.Mono;
 
+import javax.transaction.Transactional;
 import java.util.concurrent.locks.Lock;
 import java.util.concurrent.locks.ReentrantLock;
 
@@ -21,26 +23,31 @@ public class OrderServiceImpl implements OrderService {
 
 	private final OrderRepository repository;
 
+	@Qualifier("")
 	private final ProductService productService;
 
 	@Override
+	@Transactional
 	public Mono<Order> save(Order order) {
 		return repository.save(order);
 	}
 
 	@Override
-	public void delete(Order order) {
-		repository.delete(order).subscribe();
+	@Transactional
+	public Mono<Void> delete(Order order) {
+		return repository.delete(order);
 	}
 
 	@Override
-	public void update(Order order) {
-		repository.save(order).subscribe();
+	@Transactional
+	public Mono<Order> update(Order order) {
+		return repository.save(order);
 	}
 
 	@Override
-	public void patch(Order order) {
-		repository.save(order).subscribe();
+	@Transactional
+	public Mono<Order> patch(Order order) {
+		return repository.save(order);
 	}
 
 	@Override
@@ -61,7 +68,7 @@ public class OrderServiceImpl implements OrderService {
 	 * @return 订单
 	 */
 	@Override
-	public void placeOrder(Long productId, Long number) {
+	public synchronized void placeOrder(Long productId, Long number) {
 		// 1. 查库存
 		productService.findById(productId).subscribe(product -> toPlaceOrder(product, number));
 	}
@@ -69,21 +76,39 @@ public class OrderServiceImpl implements OrderService {
 
 	private Lock lock = new ReentrantLock();
 
-	synchronized void toPlaceOrder(Product product, Long number) {
-		if (product.getStock() >= number) {
-			lock.lock();
-			// 2. 库存充足，扣减库存
-			product.setStock(product.getStock() - number);
-			productService.patch(product);
+	@Transactional
+	synchronized Mono<Void> toPlaceOrder(Product product, Long number) {
+		// 2. 库存充足，扣减库存
+		subtractStock(product, number).subscribe(result -> {
+			// 根据减库存的结果下单
+			if (result) {
+				// 2.1 下订单
+				Order order = new Order("库存充足，下单成功！");
+				order.setNumber(number);
+				order.setProductId(product.getId());
+				save(order).subscribe(savedOrder -> log.info("下单成功! 订单信息: {}", savedOrder));
+			}
+		});
+		return Mono.empty();
+	}
 
-			// 2.1 下订单
-			Order order = new Order("库存充足，下单成功！");
-			order.setNumber(number);
-			order.setProductId(product.getId());
-			save(order).subscribe(savedOrder -> log.info("下单成功! 订单信息: {}", savedOrder));
-			lock.unlock();
+	/**
+	 * 减库存
+	 *
+	 * @param product
+	 * @param number
+	 * @return
+	 */
+	@Transactional
+	synchronized Mono<Boolean> subtractStock(Product product, Long number) {
+		if (product.getStock() > 0 && product.getStock() >= number) {
+			long stock = product.getStock() - number;
+			product.setStock(stock);
+			productService.patch(product).subscribe(product1 -> log.info("patch {} stock: {}", product1.getName(), stock));
+			return Mono.just(true);
 		} else {
 			log.warn("productId: {}, name: {}, 库存不足，无法下单，请补充库存!", product.getId(), product.getName());
+			return Mono.just(false);
 		}
 	}
 }

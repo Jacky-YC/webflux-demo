@@ -20,14 +20,11 @@ public class StockController {
 
 	private final static String PRODUCT_NAME = "phone";
 
-	/**
-	 * 分布式锁的名称
-	 */
-	private final static String LOCK_NAME = "d_lock";
+	private final static String DISTRIBUTED_LOCK_NAME = "d_lock";
 
 	@GetMapping("/deduction")
 	public String deduction() {
-		RLock lock = redisson.getLock(LOCK_NAME);
+		RLock lock = redisson.getLock(DISTRIBUTED_LOCK_NAME);
 		try {
 			lock.lock();
 			int stock = Integer.parseInt(stringRedisTemplate.opsForValue().get(PRODUCT_NAME));

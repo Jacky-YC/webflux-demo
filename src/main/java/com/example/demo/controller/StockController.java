@@ -31,14 +31,15 @@ public class StockController {
 			if (stock > 0) {
 				Integer newStock = stock - 1;
 				stringRedisTemplate.opsForValue().set(PRODUCT_NAME, newStock.toString());
-				System.out.println("扣减库存成功，剩余库存: " + stock);
+				System.out.println("扣减库存成功，剩余库存: " + newStock);
+				return "扣减库存成功，剩余库存: " + newStock;
 			} else {
-				System.out.println("扣减库存失败，剩余库存不足～");
+				System.out.println("剩余库存不足");
+				return "剩余库存不足";
 			}
 		} finally {
 			lock.unlock();
 		}
-		return "end";
 	}
 
 }

@@ -8,6 +8,7 @@ import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
+import reactor.core.publisher.Mono;
 
 import java.util.UUID;
 import java.util.concurrent.TimeUnit;
@@ -29,7 +30,7 @@ public class StockController {
 	private final static String MY_LOCK_NAME = "my_d_lock";
 
 	@GetMapping("/deduction")
-	public String deduction() {
+	public Mono<String> deduction() {
 		RLock lock = redisson.getLock(DISTRIBUTED_LOCK_NAME);
 		try {
 			lock.lock();
@@ -38,10 +39,10 @@ public class StockController {
 				Integer newStock = stock - 1;
 				stringRedisTemplate.opsForValue().set(PRODUCT_NAME, newStock.toString());
 				System.out.println("扣减库存成功，剩余库存: " + newStock);
-				return "扣减库存成功，剩余库存: " + newStock;
+				return Mono.just("扣减库存成功，剩余库存: " + newStock);
 			} else {
 				System.out.println("剩余库存不足");
-				return "剩余库存不足";
+				return Mono.just("剩余库存不足");
 			}
 		} finally {
 			lock.unlock();
@@ -50,7 +51,7 @@ public class StockController {
 
 	@SneakyThrows
 	@GetMapping("/deduction2")
-	public String deduction2() {
+	public Mono<String> deduction2() {
 		// setnx 获取锁
 		String uuid = UUID.randomUUID().toString();
 		// 超时时间： 死锁， 原子性
@@ -83,10 +84,10 @@ public class StockController {
 				Integer newStock = stock - 1;
 				stringRedisTemplate.opsForValue().set(PRODUCT_NAME, newStock.toString());
 				System.out.println("扣减库存成功，剩余库存: " + newStock);
-				return "扣减库存成功，剩余库存: " + newStock;
+				return Mono.just("扣减库存成功，剩余库存: " + newStock);
 			} else {
 				System.out.println("剩余库存不足");
-				return "剩余库存不足";
+				return Mono.just("剩余库存不足");
 			}
 		} finally {
 			// 保证线程只能释放自己的加的锁，而不能释放其他线程加的锁

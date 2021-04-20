@@ -11,6 +11,7 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import reactor.core.publisher.Flux;
+import reactor.core.publisher.Mono;
 
 import java.util.Random;
 import java.util.UUID;
@@ -49,7 +50,7 @@ public class OrderController {
 
 	@SneakyThrows
 	@GetMapping("/placeOrder2")
-	public String placeOrder2() {
+	public Mono<String> placeOrder2() {
 		while (!tryLock()) {
 			TimeUnit.SECONDS.sleep(1);
 			countDownLatch.countDown();
@@ -66,7 +67,7 @@ public class OrderController {
 		} finally {
 			redisTemplate.delete(DISTRIBUTION_LOCK);
 		}
-		return "success";
+		return Mono.just("success");
 	}
 
 	private Boolean tryLock() {

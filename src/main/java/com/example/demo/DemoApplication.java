@@ -1,18 +1,15 @@
 package com.example.demo;
 
-import lombok.RequiredArgsConstructor;
 import org.redisson.Redisson;
 import org.redisson.api.RedissonClient;
 import org.redisson.config.Config;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.SpringApplication;
 import org.springframework.boot.autoconfigure.SpringBootApplication;
 import org.springframework.context.annotation.Bean;
 import org.springframework.core.env.Environment;
-import org.springframework.data.r2dbc.repository.config.EnableR2dbcRepositories;
 
 @SpringBootApplication
-@EnableR2dbcRepositories
-@RequiredArgsConstructor
 public class DemoApplication {
 
 	public static void main(String[] args) {
@@ -20,7 +17,8 @@ public class DemoApplication {
 	}
 
 
-	private final Environment env;
+	@Autowired
+	private Environment env;
 
 	@Bean
 	public RedissonClient redissonClient() {
